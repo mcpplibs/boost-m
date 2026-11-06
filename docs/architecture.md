@@ -196,7 +196,7 @@ keeps byte-identical notices.
 - `tools/ci/verify_generated.py`: import/replay, generation, feature splice and
   audit on a clean tree, with `git diff`/`git status` as the oracle; a second
   build on the same configuration records the incremental TU count and mtimes.
-- `tools/ci/check_mwrap_release.py`: identity, version scheme, tag, licence split and
+- `tools/check_mwrap_release.py`: identity, version scheme, tag, licence split and
   retained-document bytes.
 - `tools/ci/test_template.py`: installs an isolated `MCPP_HOME` fixture, runs a real
   `mcpp new`, parses the rendered manifest (complete selector, version, features),

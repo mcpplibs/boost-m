@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", help="release tag; omitted during PR checks")
     args = parser.parse_args()
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[1]
 
     manifest = tomllib.loads((root / "mcpp.toml").read_text(encoding="utf-8"))
     package = manifest["package"]

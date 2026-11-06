@@ -42,7 +42,7 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 if command -v python3 >/dev/null 2>&1; then
-    python3 tools/ci/check_mwrap_release.py
+    python3 tools/check_mwrap_release.py
 fi
 
 NAME="boost-m-$VERSION"

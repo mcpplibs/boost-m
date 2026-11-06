@@ -352,4 +352,4 @@ jobs:
         run: |
           set -euo pipefail
           PY="$(command -v python3 || command -v python)"
-          "$PY" tools/ci/check_mwrap_release.py
+          "$PY" tools/check_mwrap_release.py
