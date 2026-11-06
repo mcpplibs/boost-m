@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Check tag, upstream version, licence split and entry pages
-        run: python3 tools/check_mwrap_release.py --tag "$GITHUB_REF_NAME"
+        run: python3 tools/ci/check_mwrap_release.py --tag "$GITHUB_REF_NAME"
 
       - name: Require successful source CI at this exact commit
         env:
