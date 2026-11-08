@@ -17,7 +17,8 @@ Older records are not rewritten to add it; they are indexed by date and title.
 `superseded_by` names a file, not a path, so archiving the successor does not
 break it.
 
-Only the standard library is used, and every path is handled with pathlib and
+Only the standard library is used (a third-party package would be declared in
+tools/pyproject.toml), and every path is handled with pathlib and
 written out with "/" separators, so the tools behave the same on Windows.
 """
 

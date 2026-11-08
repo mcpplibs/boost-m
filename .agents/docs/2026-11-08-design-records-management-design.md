@@ -21,8 +21,9 @@ status: landed
    `superseded_by`）。更早的 20 篇不补写，按日期和标题进入索引，检查也不覆盖它们。
 4. `.agents/` 下只有 `docs/` 与 `skills/`。原 `.agents/plan/` 的两篇计划并入
    `.agents/docs/`，未完成的工作项以后放在 `.agents/docs/todos/`。
-5. 管理、检查、移动文档的脚本统一放在 `tools/doc-tools/`，只用 Python 标准库；
-   CI 是一个独立的工作流 `.github/workflows/docs.yml`。
+5. 管理、检查、移动文档的脚本统一放在 `tools/doc-tools/`。建议只用 Python 标准库，
+   但不强制；需要第三方库时写进 `tools/pyproject.toml` 的 `dependencies`。
+   CI 是一个独立的工作流 `.github/workflows/check-docs.yml`。
 
 ## 1. 背景：删旧文档换一篇汇总的代价
 
@@ -139,7 +140,7 @@ superseded_by: 2026-12-01-....md   # 仅 superseded
 
 ### 3.5 CI
 
-`.github/workflows/docs.yml`：只在 `.agents/**`、`docs/**`、`README*.md`、
+`.github/workflows/check-docs.yml`：只在 `.agents/**`、`docs/**`、`README*.md`、
 `tools/doc-tools/**` 或该工作流自身变化时触发，在 `ubuntu-latest` 上使用 Python 3.11
 （与 `tools/pyproject.toml` 的下限一致），先跑 `tools/doc-tools/tests`，再跑
 `check_docs.py`。
