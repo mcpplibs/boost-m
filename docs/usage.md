@@ -161,7 +161,7 @@ spelling, so feature `type-traits` enables `mcpplibs.mwrap.boost.type_traits`.
 | Feature | Effect |
 |---|---|
 | `default` | 50-library closure (see below) |
-| `all-modules` | All 117 module entries (116 library interfaces + `macros`); not `log`, not `unit-test-framework` |
+| `all-modules` | All 118 module entries (117 library interfaces + `macros`); not `log`, not `unit-test-framework` |
 | `macros`, `version` | The mapping module and its thin re-export |
 | `backend-log-avx2`, `backend-log-ssse3` | Build-time Boost.Log dump implementation, x86_64 only, one per axis |
 
@@ -229,6 +229,10 @@ BMI. Configurations outside this set must use header-only consumption
   limit is a compiler boundary, not a package defect.
 - Group-level success does not prove the umbrella closure: `all-modules` is a
   module set, not a claim that every compiler can aggregate it.
+- `mcpplibs.mwrap.boost.core` does not export `boost::size` (upstream
+  `boost/core/size.hpp`, `using std::size;`): exported, it is ambiguous with
+  Boost.Range's `boost::size` in every consumer that imports both. Call
+  `std::size`, or import `mcpplibs.mwrap.boost.range` for `boost::size`.
 
 ## 7. Migrating from `ZheFeng7110.boost`
 
