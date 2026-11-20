@@ -93,8 +93,10 @@ dev-dependency 只到达测试单元**（docs/08），本包自己的单元在 `
 程序的机制），比 `mcpp build` 多 7 个组 B 库的模块接口单元（accumulators、beast、geometry、gil、
 mqtt5、polygon、qvm 的 `.m.o`），摘要不同，所以根 `mcpp test` 在另一个目录里把本包完整编译一遍
 （359 个目标文件，§4），与升级前的耗时相同；`mcpp build` 的目标文件不再被它覆盖，子工程因而可以放在
-任何一步之后。各单元的命令除输出路径外完全相同，只因单元集合不同而不能共用，这是可以向上游提出的
-改进。
+任何一步之后。各单元的命令除输出路径外完全相同，只因单元集合不同而不能共用。mcpp 的设计记录
+（`2026-11-19-ecosystem-rule-convergence-design.md` §11.1）所说的摘要只覆盖决定命令的因素，不含单元
+集合；已报告为 [mcpp#986](https://github.com/mcpp-community/mcpp/issues/986)（附最小复现：只在根为
+工作区时出现，去掉 feature 门控后 build 与 test 共用一个实例）。
 
 ### 3.2 加引号的依赖键
 
