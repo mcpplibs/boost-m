@@ -27,10 +27,11 @@
 - `todos/` 放尚未完成的工作项，它们不是决定的记录。
 - 移动或改名用 `tools/doc-tools/move_record.py`，它同时改写仓库中对该文件的引用。
 
-共 26 篇记录（其中 0 篇已归档），1 项待办。
+共 27 篇记录（其中 0 篇已归档），1 项待办。
 
 ## 进行中
 
+- [子工程复用根工程的构建产物，mcpp 升级到 2026.11.20.1](2026-11-20-sub-project-build-reuse-design.md) — active
 - [模块测试加固的发现复盘：封装层缺陷与上游 Boost 问题（对照 1.93.0.beta1）](2026-11-12-module-tests-findings-and-upstream-bugs-analysis.md) — active
 
 ## 按主题
@@ -43,6 +44,7 @@
 
 ### tests
 
+- [子工程复用根工程的构建产物，mcpp 升级到 2026.11.20.1](2026-11-20-sub-project-build-reuse-design.md) — active
 - [windows-llvm-msvc 上的进程崩溃：两个 clang 模块缺陷](2026-11-18-windows-msvc-module-crashes-analysis.md) — landed
 - [示例移植脚本进入 `tools/port_tests/`：升级 Boost 时重跑上游测试的移植](2026-11-18-port-tests-tools-design.md) — landed
 - [模块测试加固的发现复盘：封装层缺陷与上游 Boost 问题（对照 1.93.0.beta1）](2026-11-12-module-tests-findings-and-upstream-bugs-analysis.md) — active
@@ -56,6 +58,7 @@
 
 ### 2026-11
 
+- [子工程复用根工程的构建产物，mcpp 升级到 2026.11.20.1](2026-11-20-sub-project-build-reuse-design.md) — active
 - [windows-llvm-msvc 上的进程崩溃：两个 clang 模块缺陷](2026-11-18-windows-msvc-module-crashes-analysis.md) — landed
 - [示例移植脚本进入 `tools/port_tests/`：升级 Boost 时重跑上游测试的移植](2026-11-18-port-tests-tools-design.md) — landed
 - [模块测试加固的发现复盘：封装层缺陷与上游 Boost 问题（对照 1.93.0.beta1）](2026-11-12-module-tests-findings-and-upstream-bugs-analysis.md) — active

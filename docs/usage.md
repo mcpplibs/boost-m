@@ -14,20 +14,20 @@ namespace exists only for the macro mappings described below.
 ```toml
 # The default feature set (50-library closure)
 [dependencies]
-"mcpplibs.mwrap.boost" = "1.92.0"
+mcpplibs.mwrap.boost = "1.92.0"
 
 # A specific set; default-features = false stops this edge from also pulling
 # the default closure in
 [dependencies]
-"mcpplibs.mwrap.boost" = { version = "1.92.0", default-features = false, features = ["optional", "json"] }
+mcpplibs.mwrap.boost = { version = "1.92.0", default-features = false, features = ["optional", "json"] }
 
 # Everything with a module interface
 [dependencies]
-"mcpplibs.mwrap.boost" = { version = "1.92.0", default-features = false, features = ["all-modules"] }
+mcpplibs.mwrap.boost = { version = "1.92.0", default-features = false, features = ["all-modules"] }
 
 # From the repository at the immutable release tag
 [dependencies]
-"mcpplibs.mwrap.boost" = { git = "https://github.com/mcpplibs/boost-m", tag = "mwrap-1.92.0", default-features = false, features = ["optional"] }
+mcpplibs.mwrap.boost = { git = "https://github.com/mcpplibs/boost-m", tag = "mwrap-1.92.0", default-features = false, features = ["optional"] }
 ```
 
 Version scheme: the first mwrap release is the upstream version, `1.92.0`. A
@@ -92,7 +92,7 @@ interface. Enable the feature and include the upstream headers:
 
 ```toml
 [dependencies]
-"mcpplibs.mwrap.boost" = { version = "1.92.0", default-features = false, features = ["log"] }
+mcpplibs.mwrap.boost = { version = "1.92.0", default-features = false, features = ["log"] }
 ```
 
 ```cpp
@@ -190,7 +190,7 @@ a diagnostic naming the features.
 
 ```toml
 [dependencies]
-"mcpplibs.mwrap.boost" = { version = "1.92.0", default-features = false, backend = "log-avx2" }
+mcpplibs.mwrap.boost = { version = "1.92.0", default-features = false, backend = "log-avx2" }
 ```
 
 ## 5. Platforms, ABI and runtime
@@ -255,7 +255,7 @@ BMI. Configurations outside this set must use header-only consumption
 
 | Old | New |
 |---|---|
-| `[dependencies.ZheFeng7110] boost = "1.92.0.0.0.1"` | `[dependencies] "mcpplibs.mwrap.boost" = { version = "1.92.0", features = [...] }` |
+| `[dependencies.ZheFeng7110] boost = "1.92.0.0.0.1"` | `[dependencies] mcpplibs.mwrap.boost = { version = "1.92.0", features = [...] }` |
 | `import boost.optional;` | `import mcpplibs.mwrap.boost.optional;` |
 | `import boost;` | `import mcpplibs.mwrap.boost;` |
 | `features = ["type_traits"]` | `features = ["type-traits"]` |
@@ -268,7 +268,7 @@ immutable; this is a new identity, not a rename.
 
 ## 8. Toolchain pin and tests
 
-The tested build tool is pinned in `.xlings.json` (`mcpp 2026.11.5.1`); CI runs
+The tested build tool is pinned in `.xlings.json` (`mcpp 2026.11.20.1`); CI runs
 the same pin on every leg. Generation (regenerating export lists or auditing
 headers) additionally needs the clang++ 23.1.3 pinned in `.xlings.json` and the
 pinned MinGW sysroot under `tools/`; ordinary consumers only use the committed

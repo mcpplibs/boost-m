@@ -5,7 +5,7 @@ name    = "my_plugin_sum"
 version = "0.0.0"
 
 [dependencies]
-"mcpplibs.mwrap.boost" = { path = "../../../..", default-features = false, features = ["dll"] }
+mcpplibs.mwrap.boost = { path = "../../../..", default-features = false, features = ["dll"] }
 
 [targets.my_plugin_sum]
 kind = "shared"

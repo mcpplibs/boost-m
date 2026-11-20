@@ -21,5 +21,8 @@
   `.def` 为空。`patches/thread.patch` 与 `patches/serialization.patch` 去掉了这三处（说明见
   `patches/README.md`），Windows 上 `.def` 有 50689 项（PE 上限 65535），`tests/dll` 四个程序全部通过。
   `tests.yml` 的 Windows 跳过已删去（实验见 fork PR #3）。
-- [ ] 子工程（`tests/dll`、`tests/test/utf`）各自重新构建本包，A 组因此多约 15 分钟；研究复用根工程的
-  构建产物。
+- [x] **子工程各自重新构建本包**（A 组多约 15 分钟）：两个子工程与 dll 插件成为根工作区的成员，CI 在根目录
+  以 `mcpp test -p <成员> --features mcpplibs.mwrap.boost/<f>,...` 运行，复用根 `mcpp build` 的目标文件与
+  BMI（本机 10 + 5 秒）。这依赖 mcpp 按名字排列 feature 宏（2026.11.17.2）与 dev-dependency 只到达测试单元
+  （2026.11.8.1），mcpp 固定版本因此升到 2026.11.20.1（见
+  [记录](../2026-11-20-sub-project-build-reuse-design.md)）。

@@ -258,9 +258,10 @@ feature（两种 Boost.Test 形态绝不能链接在一起）。
   以及 `coverage.toml`：1.92.0 发布包中每个示例和文档章节都映射到一个用例或写明理由；
   CI 运行 `tools/ci/test_coverage.py check`。机械移植的文件（头注释写明）是生成结果：
   `tools/port_tests/regen.py` 从发布包和 oracle 重新生成它们（升级 Boost 后运行，
-  再跑 `test_coverage.py scan` / `link`）。`tests/dll/`（插件共享库作为工作区成员）与
+  再跑 `test_coverage.py scan` / `link`）。`tests/dll/`（带插件共享库）与
   `tests/test/utf/`（Boost.Test 的编译形态）是独立工程，被根清单的 `[test] discover`
-  排除，由 CI 在各自目录中运行。
+  排除。它们是根工作区的成员，CI 在根目录以 `mcpp test -p <成员>` 和根工程
+  的 feature 集合运行，从而复用根工程 `mcpp build` 的目标文件与 BMI。
 - `tools/ci/verify_generated.py`：在三种宿主平台的干净代码树上跑补丁重放、
   `gen_exports.py --check`、`gen_features.py --check` 和审计，最后 `git status`
   必须干净；在同一配置上再做一次构建，记录增量 TU 数量和 mtime。

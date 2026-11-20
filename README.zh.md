@@ -37,7 +37,7 @@ mcpp run
 
 ```toml
 [dependencies]
-"mcpplibs.mwrap.boost" = { version = "1.92.0", default-features = false, features = ["optional"] }
+mcpplibs.mwrap.boost = { version = "1.92.0", default-features = false, features = ["optional"] }
 ```
 
 ```cpp

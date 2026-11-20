@@ -292,9 +292,11 @@ keeps byte-identical notices.
   in CI. The mechanically ported files (their header says so) are generator
   output: `tools/port_tests/regen.py` re-creates them from the release archive
   and the oracle, after a Boost upgrade followed by `test_coverage.py scan` and
-  `link`. `tests/dll/` (plugin shared libraries as workspace members) and
-  `tests/test/utf/` (the compiled Boost.Test form) are projects of their own,
-  excluded from the root `[test] discover` and run by CI in their directories.
+  `link`. `tests/dll/` (with plugin shared libraries) and `tests/test/utf/`
+  (the compiled Boost.Test form) are projects of their own, excluded from the
+  root `[test] discover`. They are members of the root workspace, and CI runs
+  them from the root with `mcpp test -p <member>` and the root's feature set,
+  so they reuse the package objects and BMIs of the root `mcpp build`.
 - `tools/ci/verify_generated.py`: patch replay, `gen_exports.py --check`,
   `gen_features.py --check` and the audits on a clean tree on all three host
   platforms, then `git status` must be clean; a second build on the same

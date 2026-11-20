@@ -736,12 +736,33 @@ kind = "lib"
 # Test-only: `mcpp test` resolves it, `mcpp build` and consumers never see it.
 # The test programs under tests/<lib>/ are doctest programs, one per file.
 [dev-dependencies]
-"compat.doctest" = "2.4.12"
+compat.doctest = "2.4.12"
 
 # tests/dll/ (shared-library plugins) and tests/test/utf/ (the compiled
 # Boost.Test form, which needs the unit-test-framework feature on) are projects
-# of their own; CI runs `mcpp test` inside each. The header-only Boost.Test form
-# (tests/test/included/) stays here. A nested mcpp.toml does not hide a
-# directory from this glob, hence the `!`.
+# of their own. The header-only Boost.Test form (tests/test/included/) stays
+# here. A nested mcpp.toml does not hide a directory from this glob, hence the
+# `!`.
 [test]
 discover = ["tests/**/*.cpp", "!tests/dll/**", "!tests/test/utf/**"]
+
+# The test projects are members of this workspace, so `mcpp test -p <member>`
+# at this root builds in this package's build directory: given the feature set
+# of the root `mcpp build` (`--features mcpplibs.mwrap.boost/<f>,...`), it
+# reuses that build's objects and BMIs instead of compiling the package again
+# (CI's `Test sub-projects` step). A
+# rooted workspace's bare `mcpp build` / `mcpp test` still act on this package
+# only, and a consumer reaching it through path, git or the index tarball does
+# not plan the members.
+[workspace]
+members = [
+    "tests/dll",
+    "tests/dll/plugins/getting_started_library",
+    "tests/dll/plugins/library1",
+    "tests/dll/plugins/library2",
+    "tests/dll/plugins/my_plugin_aggregator",
+    "tests/dll/plugins/my_plugin_sum",
+    "tests/dll/plugins/on_unload_lib",
+    "tests/dll/plugins/refcounting_plugin",
+    "tests/test/utf",
+]
