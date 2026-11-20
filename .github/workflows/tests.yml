@@ -68,7 +68,7 @@ on:
       - "templates/**"
       - "tests/**"
       - "tools/**"
-      - "upstream/boost"
+      - "upstream/boost/**"
       - ".xlings.json"
       - "build.mcpp"
       - "mcpp.toml"
