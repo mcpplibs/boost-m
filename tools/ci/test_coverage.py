@@ -393,8 +393,10 @@ def program_cases(output):
     """The cases a test program printed for its listing arguments.
 
     doctest prints the names between two rules of '='. Boost.Test prints its
-    test tree, one unit per line, indented, a '*' after each enabled one; a
-    disabled unit does not run and does not count. Both list a template case
+    test tree, one unit per line: indent, name, '*' if the unit is enabled
+    (' ' if not: it does not run and does not count), then ": <description>"
+    if it has one (a name has no ": ", a template instance may hold '*', so
+    the description goes first). Both list a template case
     as its instances (`name<int>`); the case itself is `name`. Any program
     that is not a doctest one is also a whole program ("program").
     """
@@ -404,8 +406,9 @@ def program_cases(output):
         rules = [i for i, l in enumerate(body) if l and set(l) == {"="}]
         names = set(body[rules[0] + 1:rules[1]]) - {""} if len(rules) >= 2 else set()
     else:
-        names = {l.strip()[:-1] for l in lines
-                 if l.endswith("*") and l.strip() != "*"} | {"program"}
+        heads = (l.split(": ", 1)[0] for l in lines)
+        names = {h.strip()[:-1] for h in heads
+                 if h.endswith("*") and h.strip() != "*"} | {"program"}
     return names | {n.partition("<")[0] for n in names
                     if n.endswith(">") and n.partition("<")[0]}
 
