@@ -183,8 +183,11 @@ TARGET_LIBS = LIBS_M3 + LIBS_M4 + LIBS_T1A + LIBS_T2 + LIBS_T1B + LIBS_SPECIAL
 # do not see. Paths are relative to boost/.
 #
 # EXTRA_HEADERS: added to the library's public header set (its GMF) and owned
-#   by it. Header resolution, file ownership and include-edge detection all
-#   read it, so the three cannot disagree.
+#   by it: file ownership and include-edge detection read it, and the header
+#   set gains it. The source of truth for a library's header set (its GMF) is
+#   the hand-maintained generated/meta/libs.json, which headers_of() reads; a
+#   header added only there (config: boost/cstdlib.hpp) is in the GMF but has
+#   no owner here, so keep libs.json when regenerating it from the heuristics.
 #   - conversion: its headers sit at the top of boost/ under other names.
 #   - core: boost::core::string_view is a documented Core component
 #     (libs/core/doc/string_view.qbk) whose only header is
