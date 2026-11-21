@@ -233,6 +233,22 @@ jobs:
           mcpp test --toolchain "${{ matrix.target.toolchain }}" \
             --features "${{ (matrix.group == 'A' && env.BOOST_GROUP_A) || env.BOOST_GROUP_B }}"
 
+      # The cases each coverage.toml entry names, as the built programs list
+      # them (tools/ci/test_coverage.py): the same build, every program run
+      # again with the listing arguments. Group B, which has no
+      # unit-test-framework feature: with it the tests/test/included programs
+      # are stubs. tests/dll is listed in group A, where it runs.
+      - name: Check coverage cases against the test programs
+        if: matrix.group == 'B' && matrix.target.name == 'linux-gcc' && matrix.target.arch == 'x86_64'
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p .tmp
+          mcpp test --toolchain "${{ matrix.target.toolchain }}" \
+            --features "$BOOST_GROUP_B" --message-format json \
+            -- --list_content -- --list-test-cases > .tmp/listing.ndjson
+          python3 tools/ci/test_coverage.py check --listing .tmp/listing.ndjson
+
       # The two test projects of their own (design record
       # .agents/docs/2026-11-09-module-test-hardening-design.md §5): the dll
       # tutorials with the plugin shared libraries they load, and the compiled
@@ -265,6 +281,15 @@ jobs:
             mcpp test -p "$member" --toolchain "${{ matrix.target.toolchain }}" \
               --features "$features"
           done
+          # tests/dll's coverage cases, as its programs list them (see the
+          # group B step "Check coverage cases against the test programs").
+          if [ "${{ matrix.target.name }}" = "linux-gcc" ] && [ "$RUNNER_ARCH" = "X64" ]; then
+            mkdir -p .tmp
+            mcpp test -p boost-m-tests-dll --toolchain "${{ matrix.target.toolchain }}" \
+              --features "$features" --message-format json \
+              -- --list_content -- --list-test-cases > .tmp/listing-dll.ndjson || true
+            python3 tools/ci/test_coverage.py check --listing .tmp/listing-dll.ndjson
+          fi
 
   # Runs only after every A/B leg passed. The examples consume the wrapper the
   # way a user does (umbrella import, explicit features, profile backend), then

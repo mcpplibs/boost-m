@@ -15,9 +15,10 @@ The vendored tree under ``upstream/boost/`` is pruned of ``example/`` and
     link   fill in `case` for the ``todo`` entries whose test case follows the
            naming convention below; prints what is still ``todo``.
     check  consistency of the committed inventories, without the archive:
-           no ``todo``; a ``case`` names an existing test file that declares
-           that test case; every other status carries a reason; libraries
-           with customization points have tests/<lib>/custom_types.cpp.
+           no ``todo``; a ``case`` names an existing test file; every other
+           status carries a reason; libraries with customization points have
+           tests/<lib>/custom_types.cpp. With ``--listing`` it also checks
+           each ``case`` against the cases its test program reports (below).
 
 Entry status:
 
@@ -30,7 +31,21 @@ A <test name> is the path under tests/ without ``.cpp`` (``json/examples``);
 for the Boost.Test projects it is the path of the source under tests/.
 A <test case name> is the doctest ``TEST_CASE("...")`` string, or the
 ``BOOST_AUTO_TEST_CASE(name)`` identifier in tests/test/, or ``program`` for a
-test program that is an example as a whole (it defines ``main``).
+test program that is an example as a whole (not a doctest program).
+
+Case names are taken from the built programs, not from the sources (a case in
+a comment, under ``#if 0`` or behind a feature macro does not run). A listing
+is the NDJSON of one ``mcpp test`` run whose programs list their cases instead
+of running them; doctest reads ``--list-test-cases``, Boost.Test reads
+``--list_content`` and leaves what follows ``--`` to the program:
+
+    mcpp test [-p <member>] --features ... --message-format json \
+        -- --list_content -- --list-test-cases > listing.ndjson
+    python3 tools/ci/test_coverage.py check --listing listing.ndjson
+
+An entry whose test is in no listing is reported as not verified: CI lists the
+root tests on a leg without the unit-test-framework feature (with it, the
+tests/test/included programs are stubs) and tests/dll on a leg that has it.
 
 Naming convention (what ``link`` matches, in any tests/<lib>/**/*.cpp):
 
@@ -55,10 +70,12 @@ Usage:
     python3 tools/ci/test_coverage.py scan --archive .tmp/boost-ref/boost_1_92_0.tar.gz
     python3 tools/ci/test_coverage.py scan --archive ... --libs json url
     python3 tools/ci/test_coverage.py check
+    python3 tools/ci/test_coverage.py check --listing listing.ndjson
 """
 
 import argparse
 import hashlib
+import json
 import re
 import sys
 import tarfile
@@ -348,6 +365,8 @@ def cmd_scan(args):
 # check
 # ---------------------------------------------------------------------------
 
+# What `link` matches in the sources. Only a naming proposal: `check` verifies
+# a case against what the built program lists (listing_cases).
 _DOCTEST_CASE = re.compile(r'\bTEST_CASE(?:_TEMPLATE|_FIXTURE)?\s*\(\s*(?:\w+\s*,\s*)?"((?:[^"\\]|\\.)*)"')
 # tests/{url,json}/doc_test_suite.hpp turn the libraries' own
 # TEST_SUITE(type, "name") into TEST_CASE("doc: name").
@@ -367,7 +386,73 @@ def test_cases(test):
             | ({"program"} if _MAIN.search(text) else set()))
 
 
-def check_entry(lib, entry, key, errors, cache):
+_DOCTEST_LISTING = "[doctest] listing all test case names"
+
+
+def program_cases(output):
+    """The cases a test program printed for its listing arguments.
+
+    doctest prints the names between two rules of '='. Boost.Test prints its
+    test tree, one unit per line, indented, a '*' after each enabled one; a
+    disabled unit does not run and does not count. Both list a template case
+    as its instances (`name<int>`); the case itself is `name`. Any program
+    that is not a doctest one is also a whole program ("program").
+    """
+    lines = output.splitlines()
+    if _DOCTEST_LISTING in lines:
+        body = lines[lines.index(_DOCTEST_LISTING) + 1:]
+        rules = [i for i, l in enumerate(body) if l and set(l) == {"="}]
+        names = set(body[rules[0] + 1:rules[1]]) - {""} if len(rules) >= 2 else set()
+    else:
+        names = {l.strip()[:-1] for l in lines
+                 if l.endswith("*") and l.strip() != "*"} | {"program"}
+    return names | {n.partition("<")[0] for n in names
+                    if n.endswith(">") and n.partition("<")[0]}
+
+
+def member_dirs():
+    """{workspace member package name: its directory under tests/}"""
+    manifest = tomllib.loads((ROOT / "mcpp.toml").read_text(encoding="utf-8"))
+    dirs = {}
+    for member in manifest.get("workspace", {}).get("members", []):
+        path = ROOT / member / "mcpp.toml"
+        if not path.is_file() or not member.startswith("tests/"):
+            continue
+        name = tomllib.loads(path.read_text(encoding="utf-8"))["package"]["name"]
+        dirs[name] = member[len("tests/"):]
+    return dirs
+
+
+def listing_cases(paths):
+    """{test name: set of case names, or None if it was not built and run}
+    over the NDJSON records of `mcpp test --message-format json` runs."""
+    dirs, found = member_dirs(), {}
+    for path in paths:
+        records = 0
+        for line in Path(path).read_text(encoding="utf-8").splitlines():
+            if not line.startswith("{"):
+                continue
+            record = json.loads(line)
+            if "status" not in record:
+                continue
+            records += 1
+            member = record.get("member", "")
+            if member and member not in dirs:
+                raise SystemExit("{}: member {!r} is not a workspace member under "
+                                 "tests/".format(path, member))
+            test = (dirs[member] + "/" if member else "") + record["test"]
+            if record["status"] not in ("pass", "run_fail"):
+                found.setdefault(test, None)
+                continue
+            found[test] = (found.get(test) or set()) | program_cases(
+                record.get("run_output", ""))
+        if not records:
+            raise SystemExit("{}: no test record (not the NDJSON of a `mcpp test "
+                             "--message-format json` run?)".format(path))
+    return found
+
+
+def check_entry(lib, entry, key, errors, listed, unverified):
     status = entry.get("status", "covered" if "case" in entry else "todo")
     where = "tests/{}/coverage.toml: {}".format(lib, entry.get(key, "?"))
     if status not in STATUSES:
@@ -386,13 +471,15 @@ def check_entry(lib, entry, key, errors, cache):
             errors.append("{}: case {!r} is not <test>:<case>".format(
                 where, entry["case"]))
             return status
-        if test not in cache:
-            cache[test] = test_cases(test)
-        if cache[test] is None:
+        if not (TESTS / (test + ".cpp")).is_file():
             errors.append("{}: no test file tests/{}.cpp".format(where, test))
-        elif case not in cache[test]:
-            errors.append("{}: tests/{}.cpp declares no test case {!r}".format(
-                where, test, case))
+        elif test not in listed:
+            unverified.append(entry["case"])
+        elif listed[test] is None:
+            errors.append("{}: tests/{}.cpp was not built and run".format(where, test))
+        elif case not in listed[test]:
+            errors.append("{}: the program of tests/{}.cpp lists no test case "
+                          "{!r}".format(where, test, case))
     return status
 
 
@@ -453,8 +540,9 @@ def cmd_link(args):
                 print("    todo " + t)
 
 
-def cmd_check(_args):
-    errors, cache, totals = [], {}, {}
+def cmd_check(args):
+    errors, totals, unverified = [], {}, []
+    listed = listing_cases(args.listing)
     for lib in LIBRARIES:
         data = load(lib)
         if data is None:
@@ -466,7 +554,7 @@ def cmd_check(_args):
         counts = {}
         for table, key in (("example", "path"), ("snippet", "doc")):
             for entry in data.get(table, []):
-                st = check_entry(lib, entry, key, errors, cache)
+                st = check_entry(lib, entry, key, errors, listed, unverified)
                 counts[st] = counts.get(st, 0) + 1
         totals[lib] = counts
         if lib in CUSTOM_TYPES:
@@ -478,6 +566,13 @@ def cmd_check(_args):
     for lib, counts in totals.items():
         print("{:16} {}".format(lib, "  ".join(
             "{} {}".format(k, counts[k]) for k in sorted(counts))))
+    if not args.listing:
+        print("case names not verified (no --listing)")
+    elif unverified:
+        tests = sorted({c.partition(":")[0] for c in unverified})
+        print("{} case(s) of {} test(s) not verified: in no listing ({}{})".format(
+            len(unverified), len(tests), ", ".join(tests[:5]),
+            ", ..." if len(tests) > 5 else ""))
     if errors:
         print("\n{} problem(s):".format(len(errors)), file=sys.stderr)
         for e in errors:
@@ -499,6 +594,9 @@ def main(argv=None):
     k.add_argument("-v", "--verbose", action="store_true")
     k.set_defaults(func=cmd_link)
     c = sub.add_parser("check", help="check the committed inventories")
+    c.add_argument("--listing", action="append", default=[], metavar="NDJSON",
+                   help="`mcpp test --message-format json` output of the listing "
+                        "run (see above); repeatable")
     c.set_defaults(func=cmd_check)
     args = ap.parse_args(argv)
     return args.func(args) or 0

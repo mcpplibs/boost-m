@@ -289,7 +289,9 @@ keeps byte-identical notices.
   `api*.cpp`), user types at each customization point (`custom_types.cpp`), and
   `coverage.toml`, which maps every example and documentation section of the
   1.92.0 release to a case or a reason; `tools/ci/test_coverage.py check` runs
-  in CI. The mechanically ported files (their header says so) are generator
+  in CI, and on the linux-gcc x86_64 legs also checks each case against the
+  cases the built test programs list (doctest `--list-test-cases`, Boost.Test
+  `--list_content`). The mechanically ported files (their header says so) are generator
   output: `tools/port_tests/regen.py` re-creates them from the release archive
   and the oracle, after a Boost upgrade followed by `test_coverage.py scan` and
   `link`. `tests/dll/` (with plugin shared libraries) and `tests/test/utf/`
