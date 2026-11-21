@@ -80,13 +80,15 @@ inline void ex_wait_listening(const std::string& port) {
     }
 }
 // Connects `n` times (retrying while the example is not listening yet),
-// optionally sends `send`, and reads until the server closes.
+// optionally sends `send`, and reads until the server closes. Failed connects
+// and resets before any data share one retry budget, each retry after a
+// pause, so a server that resets every connection cannot spin the peer.
 inline void ex_peer_async(std::string port, int n, std::string send = {}) {
     std::thread([port, n, send] {
+        int tries = 0;
         for (int k = 0; k < n; ++k) {
             boost::asio::io_context c;
             boost::asio::ip::tcp::socket s(c);
-            int tries = 0;
             while (!ex_try_connect(s, port)) {
                 if (++tries > 300) return;
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -99,7 +101,11 @@ inline void ex_peer_async(std::string port, int n, std::string send = {}) {
             while (!ec) got += s.read_some(boost::asio::buffer(buf), ec);
             // reset before any data: the connection landed in the backlog of
             // the previous server's acceptor as it closed; it does not count
-            if (got == 0 && ec == boost::asio::error::connection_reset) --k;
+            if (got == 0 && ec == boost::asio::error::connection_reset) {
+                if (++tries > 300) return;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                --k;
+            }
         }
     }).detach();
 }
