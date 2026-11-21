@@ -57,7 +57,7 @@ feature 名一律小寫 kebab-case；模組後綴保留 Boost 自己的分組拼
 
 | Feature | 作用 |
 |---|---|
-| `default` | 50 庫基線閉包（純標頭核心 + filesystem/regex/thread/chrono/json/serialization） |
+| `default` | 51 庫基線閉包（純標頭核心 + filesystem/regex/thread/chrono/json/serialization） |
 | `all-modules` | 全部模組介面（118 個）；`log`、`unit-test-framework` 仍需明確啟用 |
 | `macros` | 巨集常數映射模組；`version` 會重新匯出它 |
 | `log`、`unit-test-framework` | 無模組的編譯庫：直接 include 上游標頭檔 |

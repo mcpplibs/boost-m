@@ -12,7 +12,7 @@ namespace exists only for the macro mappings described below.
 ## 1. Dependency declaration
 
 ```toml
-# The default feature set (50-library closure)
+# The default feature set (51-library closure)
 [dependencies]
 mcpplibs.mwrap.boost = "1.92.0"
 
@@ -160,7 +160,7 @@ spelling, so feature `type-traits` enables `mcpplibs.mwrap.boost.type_traits`.
 
 | Feature | Effect |
 |---|---|
-| `default` | 50-library closure (see below) |
+| `default` | 51-library closure (see below) |
 | `all-modules` | All 118 module entries (117 library interfaces + `macros`); not `log`, not `unit-test-framework` |
 | `macros`, `version` | The mapping module and its thin re-export |
 | `backend-log-avx2`, `backend-log-ssse3` | Build-time Boost.Log dump implementation, x86_64 only, one per axis |
@@ -168,10 +168,10 @@ spelling, so feature `type-traits` enables `mcpplibs.mwrap.boost.type_traits`.
 The default closure is closed over the module import edges:
 `optional variant variant2 any core container-hash mp11 type-traits algorithm
 iterator range io endian tuple system filesystem regex thread chrono json array
-assert compat concept-check config dynamic-bitset functional integer intrusive
-lambda lexical-cast move multi-array ratio smart-ptr throw-exception tokenizer
-type-index units utility winapi atomic container date-time math random
-serialization numeric version macros`.
+assert bind compat concept-check config conversion dynamic-bitset function
+functional integer intrusive lambda lexical-cast move multi-array ratio
+smart-ptr throw-exception tokenizer type-index units utility winapi atomic
+container date-time math random serialization numeric version macros`.
 
 Features are additive across dependency edges. `default-features = false` on one
 edge only closes the default set that edge would have requested: another edge may

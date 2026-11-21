@@ -57,7 +57,7 @@ feature 名一律小写 kebab-case；模块后缀保留 Boost 自己的分组拼
 
 | Feature | 作用 |
 |---|---|
-| `default` | 50 库基线闭包（纯头核心 + filesystem/regex/thread/chrono/json/serialization） |
+| `default` | 51 库基线闭包（纯头核心 + filesystem/regex/thread/chrono/json/serialization） |
 | `all-modules` | 全部模块接口（118 个）；`log`、`unit-test-framework` 仍需显式启用 |
 | `macros` | 宏常量映射模块；`version` 会重新导出它 |
 | `log`、`unit-test-framework` | 无模块的编译库：直接 include 上游头文件 |

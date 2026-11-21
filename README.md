@@ -59,7 +59,7 @@ grouping spelling (`type-traits` enables `mcpplibs.mwrap.boost.type_traits`).
 
 | Feature | Purpose |
 |---|---|
-| `default` | The 50-library baseline closure (header-only core + filesystem/regex/thread/chrono/json/serialization) |
+| `default` | The 51-library baseline closure (header-only core + filesystem/regex/thread/chrono/json/serialization) |
 | `all-modules` | Every module interface (118 entries); `log` and `unit-test-framework` stay explicit |
 | `macros` | The mapped macro constants module; `version` re-exports it |
 | `log`, `unit-test-framework` | Compiled libraries with no module: include the upstream headers |

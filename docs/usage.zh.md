@@ -8,7 +8,7 @@ Boost 1.92.0 被封装为 C++23 具名模块。导入模块即可替代该库的
 ## 1. 依赖声明
 
 ```toml
-# The default feature set (50-library closure)
+# The default feature set (51-library closure)
 [dependencies]
 mcpplibs.mwrap.boost = "1.92.0"
 
@@ -127,7 +127,7 @@ static_assert(mcpplibs::mwrap::boost::macros::BOOST_VERSION == raw_version);
 
 | 特征 | 作用 |
 |---|---|
-| `default` | 50 个库构成的闭包（见下文） |
+| `default` | 51 个库构成的闭包（见下文） |
 | `all-modules` | 全部 118 个模块条目（117 个库接口 + `macros`）；不含 `log`，不含 `unit-test-framework` |
 | `macros`、`version` | 映射模块及其薄重导出 |
 | `backend-log-avx2`、`backend-log-ssse3` | 构建期的 Boost.Log dump 实现，仅限 x86_64，每条轴各择其一 |
@@ -135,10 +135,10 @@ static_assert(mcpplibs::mwrap::boost::macros::BOOST_VERSION == raw_version);
 默认闭包沿模块导入边闭合：
 `optional variant variant2 any core container-hash mp11 type-traits algorithm
 iterator range io endian tuple system filesystem regex thread chrono json array
-assert compat concept-check config dynamic-bitset functional integer intrusive
-lambda lexical-cast move multi-array ratio smart-ptr throw-exception tokenizer
-type-index units utility winapi atomic container date-time math random
-serialization numeric version macros`。
+assert bind compat concept-check config conversion dynamic-bitset function
+functional integer intrusive lambda lexical-cast move multi-array ratio
+smart-ptr throw-exception tokenizer type-index units utility winapi atomic
+container date-time math random serialization numeric version macros`。
 
 特征在各依赖边上可累加。某条边上的 `default-features = false` 只关闭该边本来会请求的默认集合：其他边仍可再次请求默认特征，而显式特征总是生效。启用某特征会追加其 `implies` 闭包，因此选中一个库时，拉取的正好是该库接口所导入的内容。
 
