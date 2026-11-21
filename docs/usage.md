@@ -71,6 +71,12 @@ import mcpplibs.mwrap.boost.optional;    // module API
 BOOST_SCOPE_EXIT(void) { /* ... */ } BOOST_SCOPE_EXIT_END
 ```
 
+Put the `#include` lines before the `import` lines. A header that shares
+declarations with an imported module's global module fragment and is included
+after the import is rejected by both pinned compilers (GCC 16.1: "conflicting
+declaration of template"; Clang: "cannot add 'abi_tag' attribute in a
+redeclaration").
+
 ### 2.3 Include-only libraries
 
 Some libraries are consumed by header only. They have no module and no feature.
@@ -250,6 +256,30 @@ BMI. Configurations outside this set must use header-only consumption
   `boost/core/size.hpp`, `using std::size;`): exported, it is ambiguous with
   Boost.Range's `boost::size` in every consumer that imports both. Call
   `std::size`, or import `mcpplibs.mwrap.boost.range` for `boost::size`.
+- `mcpplibs.mwrap.boost.cobalt` does not provide `main`. `boost/cobalt.hpp`
+  includes `boost/cobalt/main.hpp`, which defines the program's `main` to run
+  the user's `co_main`; in a module's global module fragment that definition
+  would reach every importer, and Clang then rejects a consumer's own `main`.
+  The module has the other headers of `boost/cobalt.hpp`. A program written with
+  `co_main` includes `<boost/cobalt/main.hpp>` itself, before the import
+  (tested on GCC and Clang by `tests/cobalt/co_main.cpp`):
+
+  ```cpp
+  #include <boost/cobalt/main.hpp>
+  import mcpplibs.mwrap.boost.cobalt;
+
+  boost::cobalt::main co_main(int argc, char* argv[]) { co_return 0; }
+  ```
+
+  A program with its own `main` runs coroutines with `boost::cobalt::run`.
+- `mcpplibs.mwrap.boost.geometry` does not include
+  `boost/geometry/geometries/adapted/boost_fusion.hpp`. That header adapts every
+  Fusion sequence as a point, and other headers of the module make
+  `boost::tuple`, `boost::array` and `std::pair` Fusion sequences; with both in
+  one global module fragment, a `boost::tuple` point matches two partial
+  specializations of `traits::tag` and the `boost::tuple` adaptation cannot be
+  used. A consumer that adapts Fusion sequences includes the header itself,
+  before the import (as `tests/geometry/examples_core_geometries_6.cpp` does).
 
 ## 7. Migrating from `ZheFeng7110.boost`
 

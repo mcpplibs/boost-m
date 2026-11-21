@@ -2,7 +2,8 @@
 // (hand-maintained; tools/gen_exports.py --check verifies its GMF include set)
 module;
 // boost/cobalt.hpp without boost/cobalt/main.hpp, which defines main
-// (tools/export_policy.toml [cobalt]).
+// (tools/export_policy.toml [cobalt]; a co_main program includes it before the
+// import, docs/usage.md §6).
 #include <boost/cobalt/async_for.hpp>
 #include <boost/cobalt/channel.hpp>
 #include <boost/cobalt/concepts.hpp>

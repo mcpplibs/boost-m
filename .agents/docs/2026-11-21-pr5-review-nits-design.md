@@ -15,7 +15,7 @@ status: active
 第二轮评审有八条 [nit]。六条在本轮修复，对应的评审线程已标为已解决；另外两条（`ex_free_port`
 的端口竞争、看门狗线程在静态析构期间访问静态对象）按作者回复暂缓：
 [#7](https://github.com/mcpplibs/boost-m/issues/7) 打算用 mtest 取代这套 asio 测试辅助代码，上游
-mtest 已适配 doctest，到时这两处随之消失。[重要] 级的 cobalt `main` 一条不在本轮范围内。
+mtest 已适配 doctest，到时这两处随之消失。[重要] 级的 cobalt `main` 一条见 §5。
 
 改动最大的是 `tools/ci/test_coverage.py check`：`coverage.toml` 中每个 `case` 不再用正则在源文件里
 找，而是与**构建出的测试程序**列出的用例比对（§2）。CI 首轮运行即发现解析器的一处错误（§3），
@@ -117,3 +117,19 @@ tests/test/included/doc_reference.cpp lists no test case 'decorator_description'
 - `ex_free_port` 端口竞争与看门狗线程：见 §0，随 #7 处理。
 - 其他平台不跑 listing 核对：用例集合与平台无关，平台特有的跳过通过 `coverage.toml` 的
   `excluded` 表达，不需要逐平台核对。
+
+## 5. [重要] cobalt 不提供 `main`、geometry 去掉 Fusion 适配器
+
+两处移除本身不变（理由见 `tools/export_policy.toml` 的 `[cobalt]`、`[geometry]` 段），补的是文档与测试：
+
+- `docs/usage.md` §6（及 `usage.zh.md`）记录两处移除与替代写法；`usage.zh.md` §6 同时补上英文版已有的
+  `boost::size` 一条。§2.2 增加“`#include` 写在 `import` 之前”的规则。
+- 新增 `tests/cobalt/co_main.cpp`：先 `#include <boost/cobalt/main.hpp>`，再
+  `import mcpplibs.mwrap.boost.cobalt;`，定义 `co_main`（task 与 channel）。它不是 doctest 程序，
+  `main` 来自 `main.hpp`；CI 的每条腿都会构建并运行它。本机 gcc 16.1.0 与 llvm 22.1.8 均通过。
+- 顺序的验证：把 include 移到 import 之后，两个编译器都编译失败——gcc 报
+  `conflicting declaration of template 'std::reference_wrapper'` 等，clang 报
+  `cannot add 'abi_tag' attribute in a redeclaration`。所以文档只给出 include 在前的写法，
+  评审提到的“import 之后再 include”是不受支持的。
+- geometry 的写法（include `adapted/boost_fusion.hpp` 在前）已由
+  `tests/geometry/examples_core_geometries_6.cpp` 覆盖，没有新增测试。

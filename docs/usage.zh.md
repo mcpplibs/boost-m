@@ -59,6 +59,8 @@ import mcpplibs.mwrap.boost.optional;    // module API
 BOOST_SCOPE_EXIT(void) { /* ... */ } BOOST_SCOPE_EXIT_END
 ```
 
+`#include` 行应写在 `import` 行之前。若某个头文件与所导入模块的全局模块片段共享声明，却在 import 之后才被包含，两个固定的编译器都会拒绝（GCC 16.1：「conflicting declaration of template」；Clang：「cannot add 'abi_tag' attribute in a redeclaration」）。
+
 ### 2.3 仅头文件使用的库
 
 有些库只以头文件方式使用。它们既没有模块，也没有特征。
@@ -177,6 +179,18 @@ clang-msvc 上有两个影响模块的 clang 缺陷（llvm 22.1.8 与 23.1.3 均
 - 当任何模块通过伞模块间接重导出 `mcpplibs.mwrap.boost.sort` 时，GCC 16.1 会在写出其 BMI 的过程中内部错误（ICE）。根模块在 GCC 下会略过 `sort` 并给出警告；请直接导入 `mcpplibs.mwrap.boost.sort`（这是允许的，且不受影响）。
 - 构建整个 `all-modules` 闭包时，可能触及 Clang 的 2^31 源位置上限。此时应改为导入库分组而非伞模块；该上限是编译器的边界，而非包的缺陷。
 - 分组级别的成功并不能证明伞模块闭包可用：`all-modules` 是一个模块集合，而非「每个编译器都能聚合它」的声明。
+- `mcpplibs.mwrap.boost.core` 不导出 `boost::size`（上游 `boost/core/size.hpp` 中的 `using std::size;`）：若导出，它在同时导入 Boost.Range 的每个消费者中都会与 Boost.Range 的 `boost::size` 产生二义。请调用 `std::size`，或导入 `mcpplibs.mwrap.boost.range` 以使用 `boost::size`。
+- `mcpplibs.mwrap.boost.cobalt` 不提供 `main`。`boost/cobalt.hpp` 包含 `boost/cobalt/main.hpp`，后者定义程序的 `main` 来运行用户的 `co_main`；放在模块的全局模块片段中，这个定义会传到每个导入方，Clang 随后会拒绝消费者自己的 `main`。该模块包含 `boost/cobalt.hpp` 的其余头文件。用 `co_main` 编写的程序自行包含 `<boost/cobalt/main.hpp>`，且写在 import 之前（`tests/cobalt/co_main.cpp` 在 GCC 与 Clang 上测试）：
+
+  ```cpp
+  #include <boost/cobalt/main.hpp>
+  import mcpplibs.mwrap.boost.cobalt;
+
+  boost::cobalt::main co_main(int argc, char* argv[]) { co_return 0; }
+  ```
+
+  自带 `main` 的程序用 `boost::cobalt::run` 运行协程。
+- `mcpplibs.mwrap.boost.geometry` 不包含 `boost/geometry/geometries/adapted/boost_fusion.hpp`。该头文件把每个 Fusion 序列适配为点，而模块中的其他头文件使 `boost::tuple`、`boost::array` 与 `std::pair` 成为 Fusion 序列；二者同处一个全局模块片段时，`boost::tuple` 点会匹配 `traits::tag` 的两个偏特化，`boost::tuple` 适配因此无法使用。需要适配 Fusion 序列的消费者自行包含该头文件，且写在 import 之前（如 `tests/geometry/examples_core_geometries_6.cpp`）。
 
 ## 7. 从 `ZheFeng7110.boost` 迁移
 
