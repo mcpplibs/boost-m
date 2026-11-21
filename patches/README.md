@@ -75,7 +75,9 @@ patch spells them `BOOST_INLINE_CONSTEXPR`, as upstream already does for
 `long_double_constants` objects of `BOOST_DEFINE_MATH_CONSTANT` and the
 nonfinite facet flags (`legacy`, `signed_zero`, `trap_infinity`, `trap_nan`) had
 internal linkage (`static constexpr`, `const int`) and were not exported; they
-become `inline constexpr`. `tools/cubic_roots.hpp` called `sin` and the
+become `inline constexpr` (the facet header spells it `BOOST_INLINE_CONSTEXPR`
+and now includes `boost/config.hpp`, which Boost.Math leaves out under
+`BOOST_MATH_STANDALONE`). `tools/cubic_roots.hpp` called `sin` and the
 optimizers' line search `fabs` unqualified with no `using std::...`, so they
 found `::sin` / `::fabs` of the C library header, which a module's importers do
 not see; the using-declarations are added. The third change is an upstream bug:

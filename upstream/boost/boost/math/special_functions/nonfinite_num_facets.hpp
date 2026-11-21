@@ -22,6 +22,7 @@
 #include <ios>
 #include <limits>
 #include <locale>
+#include <boost/config.hpp> // boost-m vendored edit: BOOST_INLINE_CONSTEXPR below
 #include <boost/math/tools/throw_exception.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/sign.hpp>

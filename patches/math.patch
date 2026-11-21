@@ -63,10 +63,18 @@ index c677852d..520ad359 100644
              if (lnode_row.size() > 0) {
                  if (lnode_row.back() == node) {
 diff --git a/upstream/boost/boost/math/special_functions/nonfinite_num_facets.hpp b/upstream/boost/boost/math/special_functions/nonfinite_num_facets.hpp
-index 5e08c10d..b41116a7 100644
+index 5e08c10d..1996b5c4 100644
 --- a/upstream/boost/boost/math/special_functions/nonfinite_num_facets.hpp
 +++ b/upstream/boost/boost/math/special_functions/nonfinite_num_facets.hpp
-@@ -36,15 +36,17 @@ namespace boost {
+@@ -22,6 +22,7 @@
+ #include <ios>
+ #include <limits>
+ #include <locale>
++#include <boost/config.hpp> // boost-m vendored edit: BOOST_INLINE_CONSTEXPR below
+ #include <boost/math/tools/throw_exception.hpp>
+ #include <boost/math/special_functions/fpclassify.hpp>
+ #include <boost/math/special_functions/sign.hpp>
+@@ -36,15 +37,17 @@ namespace boost {
    namespace math {
  
      // flags (enums can be ORed together)       -----------------------------------
