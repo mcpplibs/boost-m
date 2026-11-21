@@ -183,11 +183,11 @@ def main():
     # directory holding its own mcpp.toml is not part of the digest.
     home_root = Path(tempfile.mkdtemp(prefix=name + "-template-home-"))
     home = home_root / "home"
-    package_dir = install_fixture(home, namespace, name, version)
-    env = dict(os.environ, MCPP_HOME=str(home))
-
     selector = identity + "@" + version
     try:
+        package_dir = install_fixture(home, namespace, name, version)
+        env = dict(os.environ, MCPP_HOME=str(home))
+
         run([args.mcpp, "new", "--list-templates", selector],
             temporary, env)
         run([args.mcpp, "new", "quickstart", "--template",
